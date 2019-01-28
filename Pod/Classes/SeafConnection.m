@@ -1641,6 +1641,17 @@ static AFHTTPRequestSerializer <AFURLRequestSerialization> * _requestSerializer;
     }
 }
 
+- (void)getShareLink:(NSString *)repoId path:(NSString *)path
+             handler:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, id JSON, NSError * _Nullable error))handler {
+    
+    NSString *url = [NSString stringWithFormat:API_URLV21"/share-links/?repo_id=%@&path=%@", repoId, [path escapedUrl]];
+    [self sendRequest:url success:^(NSURLRequest * _Nonnull request, NSHTTPURLResponse * _Nonnull response, id  _Nonnull JSON) {
+        NSArray *result = [NSArray arrayWithArray:JSON];
+        handler(request, response, result.firstObject, nil);
+    } failure:^(NSURLRequest * _Nonnull request, NSHTTPURLResponse * _Nullable response, id  _Nullable JSON, NSError * _Nullable error) {
+        handler(request, response, nil, error);
+    }];}
+
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification object:[NSUbiquitousKeyValueStore defaultStore]];
 }

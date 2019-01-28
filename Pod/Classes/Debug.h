@@ -12,6 +12,7 @@
 
 
 #define API_URL  @"/api2"
+#define API_URLV21  @"/api/v2.1"
 #if DEBUG
 #define Debug(fmt, args...) NSLog(@"#%d %s %@:" fmt, __LINE__, __FUNCTION__, [NSThread currentThread], ##args)
 #else

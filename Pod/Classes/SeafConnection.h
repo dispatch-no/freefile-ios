@@ -194,6 +194,8 @@ BOOL SeafServerTrustIsValid(SecTrustRef _Nonnull serverTrust);
 - (void)saveFileProviderTagData:(NSData * _Nullable)tagData withItemIdentifier:(NSString * _Nullable)itemId;
 - (NSData * _Nullable)loadFileProviderTagDataWithItemIdentifier:(NSString * _Nullable)itemId;
 
+- (void)getShareLink:(NSString *)repoId path:(NSString *)path handler:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, id JSON, NSError * _Nullable error))handler;
+
 + (AFHTTPRequestSerializer <AFURLRequestSerialization> * _Nonnull)requestSerializer;
 
 @end

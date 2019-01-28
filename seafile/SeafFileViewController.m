@@ -36,6 +36,7 @@
 #import "SeafMkLibAlertController.h"
 #import "SeafActionsManager.h"
 #import "SeafSearchResultViewController.h"
+#import "SeafShareLinkViewController.h"
 
 enum {
     STATE_INIT = 0,
@@ -1404,24 +1405,16 @@ enum {
         SeafFile *file = (SeafFile *)[self getDentrybyIndexPath:_selectedindex tableView:self.tableView];
         [file update:self];
         [self reloadIndex:_selectedindex];
-    } else if ([S_SHARE_EMAIL isEqualToString:title]) {
-        self.state = STATE_SHARE_EMAIL;
-        SeafBase *entry = (SeafBase *)[self getDentrybyIndexPath:_selectedindex tableView:self.tableView];
-        if (!entry.shareLink) {
-            [SVProgressHUD showWithStatus:NSLocalizedString(@"Generate share link ...", @"Seafile")];
-            [entry generateShareLink:self];
-        } else {
-            [self generateSharelink:entry WithResult:YES];
-        }
     } else if ([S_SHARE_LINK isEqualToString:title]) {
         self.state = STATE_SHARE_LINK;
         SeafBase *entry = (SeafBase *)[self getDentrybyIndexPath:_selectedindex tableView:self.tableView];
-        if (!entry.shareLink) {
-            [SVProgressHUD showWithStatus:NSLocalizedString(@"Generate share link ...", @"Seafile")];
-            [entry generateShareLink:self];
-        } else {
-            [self generateSharelink:entry WithResult:YES];
-        }
+        [self getShareLink:entry];
+//        if (!entry.shareLink) {
+//            [SVProgressHUD showWithStatus:NSLocalizedString(@"Generate share link ...", @"Seafile")];
+//            [entry generateShareLink:self];
+//        } else {
+//            [self generateSharelink:entry WithResult:YES];
+//        }
     } else if ([S_SORT_NAME isEqualToString:title]) {
         [_directory reSortItemsByName];
         [self reloadTable];
@@ -1456,6 +1449,23 @@ enum {
         Debug(@"create lib");
         [self popupMklibView];
     }
+}
+
+- (void)getShareLink:(SeafBase *)entry {
+    @weakify(self);
+    [self.connection getShareLink:entry.repoId path:entry.path handler:^(NSURLRequest *request, NSHTTPURLResponse *response, id JSON, NSError * _Nullable error) {
+        @strongify(self);
+        self.state = STATE_INIT;
+        NSString *link;
+        if (JSON) {
+            link = [JSON objectForKey:@"link"];
+        }
+        SeafShareLinkViewController *shareLinkVC = [[UIStoryboard storyboardWithName:@"FolderView_iPhone" bundle:nil] instantiateViewControllerWithIdentifier:@"SeafShareLinkViewController"];
+        shareLinkVC.link = link;
+        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:shareLinkVC];
+        nav.navigationBar.tintColor = BAR_COLOR;
+        [self presentViewController:nav animated:YES completion:nil];
+    }];
 }
 
 - (void)uploadFile:(SeafUploadFile *)ufile toDir:(SeafDir *)dir overwrite:(BOOL)overwrite
